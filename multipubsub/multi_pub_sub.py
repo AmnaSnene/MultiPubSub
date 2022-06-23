@@ -146,7 +146,7 @@ class PubSub:
 
     def publish(self, client: mqtt_client, client_id: int):
         """
-        This method allows the client to publish the current timestamp each second to the self.topics (one topic).
+        This method allows the client to publisher the current timestamp each second to the self.topics (one topic).
         """
         msg_count = 0
         while True:

@@ -8,6 +8,6 @@ publishers.topics = ['topic/']
 # disconnect after 40 seconds
 publishers.duration_to_disconnect = 40
 
-# run client: publisher.
 
+# run client: publisher.
 publishers.run_multiple(pub_or_sub="pub")
