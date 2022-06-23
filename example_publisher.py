@@ -1,13 +1,13 @@
 from multipubsub.multi_pub_sub import PubSub
 
-# create PubSub object with 5 client to run later.
-publishers = PubSub(client_nb=5)
+# create PubSub object with 1 client to run later.
+publishers = PubSub()
 # specify the topics to publish on.
 publishers.topics = ['topic/']
 
 # disconnect after 40 seconds
-# publishers.duration_to_disconnect = 40
+publishers.duration_to_disconnect = 40
 
-# run clients: publishers.
-# the first publisher id  is client_1 ... the final publisher id is client_5 .
+# run client: publisher.
+
 publishers.run_multiple(pub_or_sub="pub")

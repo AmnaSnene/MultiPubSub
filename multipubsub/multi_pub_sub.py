@@ -1,4 +1,4 @@
-import _thread
+import threading
 import time
 from time import sleep
 
@@ -28,7 +28,7 @@ class PubSub:
     topics attribute type should be a list. If you are creating publishers, 
     you should provide the topic that the message should be published on as a list. 
     Example: ["mqtt/temp"] 
-    It's allow to subscribe to multiple topics at once.
+    It allows to subscribe to multiple topics at once.
     Example: ["mqtt/temp", "mqtt/level" ...]
     """
 
@@ -104,6 +104,7 @@ class PubSub:
             """
             The Callback function.
             """
+            print(rc)
             if rc != 0:
                 print(f"Client {client_id} Unexpected disconnection.")
             else:
@@ -111,10 +112,12 @@ class PubSub:
 
         mqtt_client.on_disconnect = on_disconnect
         client.disconnect()
+        print(f"Client {client_id} Disconnected!")
+
 
     def subscribe(self, client: mqtt_client, client_id: int):
         """
-        This method subscribes the client to one or multiple topic.
+        This method subscribes the client to one or multiple topics.
         """
 
         def on_message(client, userdata, msg):
@@ -157,8 +160,11 @@ class PubSub:
                 print(f"Client {client_id} Failed to send message to topic {self.topics}")
             msg_count += 1
             sleep(1)
+            if msg_count == self.duration_to_disconnect:
+                self.disconnect_mqtt(client, client_id)
+                break
 
-    def run(self, client_id: int, sub_or_sub: str):
+    def run_sub(self, client_id: int):
         """
         This method runs a client publisher or subscriber.
         :param client_id: int.
@@ -166,12 +172,7 @@ class PubSub:
         :return:
         """
         client = self.connect_mqtt(client_id)
-        if sub_or_sub == 'sub':
-            self.subscribe(client, client_id)
-        elif sub_or_sub == 'pub':
-            self.publish(client, client_id)
-        else:
-            raise Exception("Invalid argument! param sub_or_sub: two options pub for publisher and sub for subscriber.")
+        self.subscribe(client, client_id)
         client.loop_start()
         if self.duration_to_unsubscribe:
             sleep(self.duration_to_unsubscribe)
@@ -181,6 +182,10 @@ class PubSub:
             self.disconnect_mqtt(client, client_id)
             client.loop_stop()
 
+    def run_pub(self,client_id: int):
+        client = self.connect_mqtt(client_id)
+        self.publish(client, client_id)
+
     def run_multiple(self, first_client_id=1, pub_or_sub="sub"):
         """
         This method runs self._nb_client client. For that, it uses multithreading. Each client, a thread.
@@ -188,10 +193,20 @@ class PubSub:
         :param pub_or_sub: str. Two options "pub" for publisher and "sub" for subscriber.
         :return:
         """
+        if pub_or_sub not in ['sub', 'pub']:
+            raise Exception("Invalid argument! param sub_or_sub: two options pub for publisher and sub for subscriber.")
         try:
+            threads = list()
             for i in range(first_client_id, first_client_id + self._client_nb):
-                _thread.start_new_thread(self.run, (i, pub_or_sub))
+                if pub_or_sub == "sub":
+                    x = threading.Thread(target=self.run_sub, args=(i,))
+                else:
+                    x = threading.Thread(target=self.run_pub, args=(i,))
+                threads.append(x)
+                x.start()
+
+            for thread in threads:
+                thread.join()
+
         except Exception as exception:
             print(exception)
-        while 1:
-            pass
