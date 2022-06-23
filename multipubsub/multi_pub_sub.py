@@ -25,7 +25,7 @@ class PubSub:
         self._duration_to_disconnect = 0
 
     """
-    topics attribute should be a list as type. If you are creating publishers, 
+    topics attribute type should be a list. If you are creating publishers, 
     you should provide the topic that the message should be published on as a list. 
     Example: ["mqtt/temp"] 
     It's allow to subscribe to multiple topics at once.
