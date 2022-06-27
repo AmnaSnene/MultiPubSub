@@ -1,9 +1,9 @@
 from multipubsub.multi_pub import Pub
 
 # create Pub object with 1 client to run later.
-publishers = Pub(port=1883, client_nb=3)
+publishers = Pub(port=1883, client_nb=2, topics_nb=2)
 # specify the topics to publish on.
-publishers.topics = ['topic/']
+#publishers.topics = ['topic/']
 
 # disconnect after 40 seconds
 

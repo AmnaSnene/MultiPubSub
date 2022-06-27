@@ -1,3 +1,4 @@
+from datetime import datetime
 from time import sleep
 
 from multipubsub.multi_pub_sub import PubSub
@@ -7,9 +8,9 @@ from paho.mqtt import client as mqtt_client
 
 class Sub(PubSub):
 
-    def __init__(self, host="localhost", port=1883, client_nb=1):
+    def __init__(self, host="localhost", port=1883, client_nb=1, topics_nb=1, new_topics=False):
         self._duration_to_unsubscribe = 0
-        super(Sub, self).__init__()
+        PubSub.__init__(self, host=host, port=port, client_nb=client_nb, topics_nb=topics_nb, new_topics=new_topics)
 
     """
        If you want to unsubscribe from all the topics after n seconds, you should change the default value of the attribute
@@ -24,7 +25,7 @@ class Sub(PubSub):
     def duration_to_unsubscribe(self, duration_to_unsubscribe: int) -> None:
         self._duration_to_unsubscribe = duration_to_unsubscribe
 
-    def subscribe(self, client: mqtt_client, client_id: int):
+    def subscribe(self, client: mqtt_client, client_id: str):
         """
         This method subscribes the client to one or multiple topics.
         """
@@ -39,7 +40,7 @@ class Sub(PubSub):
         client.subscribe(subscription_list)
         client.on_message = on_message
 
-    def unsubscribe(self, client: mqtt_client, client_id):
+    def unsubscribe(self, client: mqtt_client, client_id: str):
         """
          This method unsubscribes the client from self.topics.
         """
@@ -48,15 +49,16 @@ class Sub(PubSub):
             """
             The callback function.
             """
-            print("unsubscribed from {}".format(self.topics))
+            print(f"{client_id}unsubscribed from {self.topics}")
 
         client.on_unsubscribe = on_unsubscribe
         client.unsubscribe(self.topics)
 
-    def run(self, client_id: int):
+
+    def run(self, client_id: str):
         """
         This method runs a client publisher or subscriber.
-        :param client_id: int.
+        :param client_id: str.
         :return:
         """
         client = self.connect_mqtt(client_id)
