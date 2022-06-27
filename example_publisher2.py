@@ -1,12 +1,12 @@
 from time import sleep
 
-from multipubsub.multi_pub_sub import PubSub
+from multipubsub.multi_pub import Pub
 
 from paho.mqtt import client as mqtt_client
 
 
 # override publish method to customize the publisher behavior.
-class Pub(PubSub):
+class CustomizedPub(Pub):
     def publish(self, client: mqtt_client, client_id: int):
         msg_count = 0
         while True:
@@ -20,6 +20,6 @@ class Pub(PubSub):
             sleep(3)
 
 
-publisher = Pub()
+publisher = CustomizedPub()
 publisher.topics = ["topic/"]
-publisher.run_multiple(pub_or_sub="pub")
+publisher.run_multiple()

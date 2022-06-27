@@ -1,11 +1,11 @@
+import abc
 import threading
-import time
 from time import sleep
-
+from abc import ABC
 from paho.mqtt import client as mqtt_client
 
 
-class PubSub:
+class PubSub(ABC):
     """
     This class allows to create multiple MQTT publishers or subscribers with the same behavior.
     This can be useful for benchmarking MQTT Broker performances.
@@ -21,7 +21,6 @@ class PubSub:
         self._client_nb = client_nb
         self._topics = None
         self._qos = 0
-        self._duration_to_unsubscribe = 0
         self._duration_to_disconnect = 0
 
     """
@@ -47,19 +46,6 @@ class PubSub:
     @qos.setter
     def qos(self, qos: int) -> None:
         self._qos = qos
-
-    """
-    If you want to unsubscribe from all the topics after n seconds, you should change the default value of the attribute
-    duration_to_unsubscribe. Defaults to 0.
-    """
-
-    @property
-    def duration_to_unsubscribe(self):
-        return self._duration_to_unsubscribe
-
-    @duration_to_unsubscribe.setter
-    def duration_to_unsubscribe(self, duration_to_unsubscribe: int) -> None:
-        self._duration_to_unsubscribe = duration_to_unsubscribe
 
     """
     If you want to disconnect after n seconds, you should change the default value of the attribute
@@ -114,94 +100,25 @@ class PubSub:
         client.disconnect()
         print(f"Client {client_id} Disconnected!")
 
-
-    def subscribe(self, client: mqtt_client, client_id: int):
-        """
-        This method subscribes the client to one or multiple topics.
-        """
-
-        def on_message(client, userdata, msg):
-            """
-            The callback function.
-            """
-            print(f"Client{client_id} Received `{msg.payload.decode()}` from `{msg.topic}` topic")
-
-        subscription_list = [(topic, self.qos) for topic in self.topics]
-        client.subscribe(subscription_list)
-        client.on_message = on_message
-
-    def unsubscribe(self, client: mqtt_client, client_id):
-        """
-         This method unsubscribes the client from self.topics.
-        """
-
-        def on_unsubscribe(client, userdata, mid):
-            """
-            The callback function.
-            """
-            print("unsubscribed from {}".format(self.topics))
-
-        client.on_unsubscribe = on_unsubscribe
-        client.unsubscribe(self.topics)
-
-    def publish(self, client: mqtt_client, client_id: int):
-        """
-        This method allows the client to publisher the current timestamp each second to the self.topics (one topic).
-        """
-        msg_count = 0
-        while True:
-            msg = int(time.time())
-            result = client.publish(self.topics[0], msg)
-            # result: [0, 1]
-            status = result[0]
-            if status == 0:
-                print(f"Client {client_id} Send `{msg}` to topic `{self.topics}`")
-            else:
-                print(f"Client {client_id} Failed to send message to topic {self.topics}")
-            msg_count += 1
-            sleep(1)
-            if msg_count == self.duration_to_disconnect:
-                self.disconnect_mqtt(client, client_id)
-                break
-
-    def run_sub(self, client_id: int):
+    @abc.abstractmethod
+    def run(self, client_id: int):
         """
         This method runs a client publisher or subscriber.
         :param client_id: int.
-        :param sub_or_sub: str. Two options "pub" for publisher and "sub" for subscriber.
         :return:
         """
-        client = self.connect_mqtt(client_id)
-        self.subscribe(client, client_id)
-        client.loop_start()
-        if self.duration_to_unsubscribe:
-            sleep(self.duration_to_unsubscribe)
-            self.unsubscribe(client, client_id)
-        if self.duration_to_disconnect:
-            sleep(self.duration_to_disconnect)
-            self.disconnect_mqtt(client, client_id)
-            client.loop_stop()
 
-    def run_pub(self,client_id: int):
-        client = self.connect_mqtt(client_id)
-        self.publish(client, client_id)
-
-    def run_multiple(self, first_client_id=1, pub_or_sub="sub"):
+    def run_multiple(self, first_client_id=1):
         """
         This method runs self._nb_client client. For that, it uses multithreading. Each client, a thread.
         :param first_client_id: int.
-        :param pub_or_sub: str. Two options "pub" for publisher and "sub" for subscriber.
         :return:
         """
-        if pub_or_sub not in ['sub', 'pub']:
-            raise Exception("Invalid argument! param sub_or_sub: two options pub for publisher and sub for subscriber.")
+
         try:
             threads = list()
             for i in range(first_client_id, first_client_id + self._client_nb):
-                if pub_or_sub == "sub":
-                    x = threading.Thread(target=self.run_sub, args=(i,))
-                else:
-                    x = threading.Thread(target=self.run_pub, args=(i,))
+                x = threading.Thread(target=self.run, args=(i,))
                 threads.append(x)
                 x.start()
 
