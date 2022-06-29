@@ -8,9 +8,9 @@ from paho.mqtt import client as mqtt_client
 
 class Sub(PubSub):
 
-    def __init__(self, host="localhost", port=1883, client_nb=1, topics_nb=1, new_topics=False):
+    def __init__(self, host="localhost", port=1883, client_nb=1, topics_nb=1):
         self._duration_to_unsubscribe = 0
-        PubSub.__init__(self, host=host, port=port, client_nb=client_nb, topics_nb=topics_nb, new_topics=new_topics)
+        PubSub.__init__(self, host=host, port=port, client_nb=client_nb, topics_nb=topics_nb)
 
     """
        If you want to unsubscribe from all the topics after n seconds, you should change the default value of the attribute
