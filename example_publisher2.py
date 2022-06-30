@@ -31,6 +31,7 @@ class CustomizedPub(Pub):
             sleep(0.0002)
         print(msg_count)
 
+
 publisher = CustomizedPub()
 publisher.topics = ["topic/"]
 publisher.run_multiple()
