@@ -54,8 +54,7 @@ class Sub(PubSub):
         client.on_unsubscribe = on_unsubscribe
         client.unsubscribe(self.topics)
 
-
-    def run(self, client_id: str):
+    def run_client(self, client_id: str):
         """
         This method runs a client publisher or subscriber.
         :param client_id: str.

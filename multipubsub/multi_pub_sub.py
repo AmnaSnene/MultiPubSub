@@ -1,10 +1,6 @@
 import abc
-import random
-import string
 import threading
 import multipubsub.tools as tools
-from datetime import datetime
-from time import sleep
 from abc import ABC
 from paho.mqtt import client as mqtt_client
 
@@ -16,6 +12,7 @@ class PubSub(ABC):
 
     host is the hostname or IP address of the remote broker. Defaults to localhost.
     port is the network port of the server host to connect to. Defaults to 1883.
+
     client_nb is the number of clients (publishers or subscribers). Defaults to 1.
     topics_nb is the number of topic to publish on or to subscribe to. Defaults to 1.
     """
@@ -26,7 +23,7 @@ class PubSub(ABC):
         self._client_nb = client_nb
         self._topics = None
         self._qos = 0
-        self._duration_to_disconnect = 0
+        self._duration_to_disconnect = None
         self._topics_nb = topics_nb
 
     """
@@ -66,7 +63,7 @@ class PubSub(ABC):
     def duration_to_disconnect(self, duration_to_disconnect: int) -> None:
         self._duration_to_disconnect = duration_to_disconnect
 
-    def set_topics(self):
+    def _set_topics(self):
         """
         :return:
         """
@@ -79,18 +76,8 @@ class PubSub(ABC):
         :param client_id:
         :return:
         """
-
-        def on_connect(client, userdata, flags, rc):
-            """
-            The Callback function.
-            """
-            if rc == 0:
-                print(f"{client_id} Connected to MQTT Broker!")
-            else:
-                print(f"{client_id} Failed to connect, return code %d\n", rc)
-
-        client = mqtt_client.Client('{}'.format(client_id))
-        client.on_connect = on_connect
+        client = mqtt_client.Client(client_id)
+        #client.on_connect = on_connect
         client.connect(self._host, self._port)
         return client
 
@@ -98,23 +85,11 @@ class PubSub(ABC):
         """
             This method disconnects the client from a broker.
         """
-
-        def on_disconnect(client, userdata, rc):
-            """
-            The Callback function.
-            """
-            print(rc)
-            if rc != 0:
-                print(f"{client_id} Unexpected disconnection.")
-            else:
-                print(f"{client_id} Disconnected!")
-
-        mqtt_client.on_disconnect = on_disconnect
+        #mqtt_client.on_disconnect = on_disconnect
         client.disconnect()
-        #print(f"{client_id} Disconnected!")
 
     @abc.abstractmethod
-    def run(self, client_id: str):
+    def run_client(self, client_id: str):
         """
         This method runs a client publisher or subscriber.
         :param client_id: str.
@@ -126,12 +101,12 @@ class PubSub(ABC):
         This method runs self._nb_client client. For that, it uses multithreading. Each client, a thread.
         :return:
         """
-        self.set_topics()
+        self._set_topics()
         try:
             threads = list()
             for i in range(self._client_nb):
                 client_id = tools.get_client_id()
-                x = threading.Thread(target=self.run, args=(client_id,))
+                x = threading.Thread(target=self.run_client, args=(client_id,))
                 threads.append(x)
                 x.start()
 
