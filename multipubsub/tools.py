@@ -31,4 +31,4 @@ def get_msg(size):
 a = os.urandom(2)
 
 #print(asizeof.asizeof(a))
-print(sys.getsizeof(a))
+#print(sys.getsizeof(a))

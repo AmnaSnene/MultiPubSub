@@ -3,7 +3,6 @@ import schedule
 import time
 import multipubsub.tools as tools
 
-
 from multipubsub.multi_pub_sub import PubSub
 
 from paho.mqtt import client as mqtt_client
@@ -56,11 +55,14 @@ class Pub(PubSub):
         """
         """
         schedule.every().second.do(self.publish_per_second, client=client, client_id=client_id, topic=topic)
-        t_end = tools.get_t_end_publishing(self.duration_to_disconnect, self.publishing_duration)
+        t_end = tools.get_t_end_publishing(self.duration_to_disconnect, self.publishing_duration) + time.time()
         while time.time() <= t_end:
             schedule.run_pending()
-        if t_end == self.duration_to_disconnect + 1:
-            self.disconnect_mqtt(client, client_id)
+        try:
+            if t_end == self.duration_to_disconnect + 1:
+                self.disconnect_mqtt(client, client_id)
+        except:
+            pass
 
     def run_client(self, client_id: str):
         client = self.connect_mqtt(client_id)
