@@ -1,4 +1,3 @@
-from datetime import datetime
 from time import sleep
 
 from multipubsub.multi_pub_sub import PubSub

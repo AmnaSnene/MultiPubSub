@@ -1,4 +1,8 @@
+import os
+import sys
+import time
 from datetime import datetime
+import uuid
 
 
 def get_client_id():
@@ -17,3 +21,14 @@ def get_t_end_publishing(duration_to_disconnect, publishing_duration):
         duration = 11124244037
 
     return duration
+
+
+def get_msg(size):
+    return str(time.time_ns()) + ',' + str(uuid.getnode())
+
+
+# Using os.urandom() method
+a = os.urandom(2)
+
+#print(asizeof.asizeof(a))
+print(sys.getsizeof(a))

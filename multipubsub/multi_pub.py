@@ -1,4 +1,3 @@
-import os
 import threading
 import schedule
 import time
@@ -44,7 +43,7 @@ class Pub(PubSub):
 
     def publish_per_second(self, client: mqtt_client, client_id: str, topic: str):
         for i in range(self.msg_per_second):
-            msg = os.urandom(self.msg_size)
+            msg = tools.get_msg(self.msg_size)
             result = client.publish(topic, msg)
             # result: [0, 1]
             status = result[0]
