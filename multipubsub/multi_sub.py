@@ -23,7 +23,7 @@ class Sub(PubSub):
     def duration_to_unsubscribe(self, duration_to_unsubscribe: int) -> None:
         self._duration_to_unsubscribe = duration_to_unsubscribe
 
-    def subscribe(self, client: mqtt_client, client_id: str):
+    def subscribe(self, client: mqtt_client):
         """
         This method subscribes the client to one or multiple topics.
         """
@@ -35,17 +35,17 @@ class Sub(PubSub):
 
             tools.calculate_latency(tools.unpack_msg(msg.payload), client)
             #print(f"{client_id} Received from `{msg.topic}` topic")
-            # print("recieved")
+            #print("received")
 
         def on_subscribe(client, userdata, mid, granted_qos):
-            print(f"Subscribed{client_id}")
+            print(f"Subscribed{client._client_id.decode()}")
 
         client.on_subscribe = on_subscribe
         subscription_list = [(topic, self.qos) for topic in self.topics]
         client.subscribe(subscription_list)
         client.on_message = on_message
 
-    def unsubscribe(self, client: mqtt_client, client_id: str):
+    def unsubscribe(self, client: mqtt_client):
         """
          This method unsubscribes the client from self.topics.
         """
@@ -54,28 +54,28 @@ class Sub(PubSub):
             """
             The callback function.
             """
-            print(f"{client_id}unsubscribed from {self.topics}")
+            print(f"{client._client_id.decode()}unsubscribed from {self.topics}")
 
         client.on_unsubscribe = on_unsubscribe
         client.unsubscribe(self.topics)
 
-    def run_client(self, client_id: str):
+    def run_client(self, client: mqtt_client):
         """
         This method runs a client publisher or subscriber.
-        :param client_id: str.
+        :param client:
         :return:
         """
-        client = self.connect_mqtt(client_id)
-        self.subscribe(client, client_id)
+        self.subscribe(client)
 
         client.loop_start()
         while 1:
             if self.duration_to_unsubscribe:
                 sleep(self.duration_to_unsubscribe)
-                self.unsubscribe(client, client_id)
+                self.unsubscribe(client)
+                break
             if self.duration_to_disconnect:
                 sleep(self.duration_to_disconnect)
-                self.disconnect_mqtt(client, client_id)
+                self.disconnect_mqtt(client)
                 client.loop_stop()
                 break
             sleep(1)

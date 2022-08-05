@@ -12,5 +12,5 @@ while True:
         publisher.client_nb = nb_pub[i]
         publisher.msg_per_second = random.randint(2, 200)
         publisher.msg_size = random.randint(16, 200)
-        publisher.publishing_duration = 10
+        publisher.publishing_duration = 4
         publisher.run_multiple()

@@ -25,6 +25,7 @@ class PubSub(ABC):
         self._qos = 0
         self._duration_to_disconnect = None
         self._topics_nb = topics_nb
+        self._current_client = []
 
     """
     topics attribute type should be a list. If you are creating publishers, 
@@ -89,15 +90,18 @@ class PubSub(ABC):
     def connect_mqtt(self, client_id: str) -> mqtt_client:
         """
         This method connects the client to a broker.
-        :param client_id:
+        param client_id:
         :return:
         """
         client = mqtt_client.Client(client_id)
+        print('client')
         # client.on_connect = on_connect
         client.connect(self._host, self._port)
+        print('connected')
         return client
 
-    def disconnect_mqtt(self, client: mqtt_client, client_id: str):
+    @staticmethod
+    def disconnect_mqtt(client: mqtt_client):
         """
             This method disconnects the client from a broker.
         """
@@ -105,12 +109,28 @@ class PubSub(ABC):
         client.disconnect()
 
     @abc.abstractmethod
-    def run_client(self, client_id: str):
+    def run_client(self, client: mqtt_client):
         """
         This method runs a client publisher or subscriber.
-        :param client_id: str.
+        param client_id: str.
         :return:
         """
+
+    def update_client_list(self):
+        difference_client = len(self._current_client) - self._client_nb
+        print(abs(difference_client))
+        if difference_client < 0:
+            for i in range(abs(difference_client)):
+                print("append")
+                id = tools.get_client_id()
+                print(id)
+                client = self.connect_mqtt(id)
+                print('connect')
+                self._current_client.append(client)
+        else:
+            for i in range(difference_client):
+                client = self._current_client.pop()
+                self.disconnect_mqtt(client)
 
     def run_multiple(self):
         """
@@ -118,11 +138,13 @@ class PubSub(ABC):
         :return:
         """
         self._set_topics()
+        print(self._topics)
         try:
             threads = list()
-            for i in range(self._client_nb):
-                client_id = tools.get_client_id()
-                x = threading.Thread(target=self.run_client, args=(client_id,))
+            self.update_client_list()
+            print(self._current_client)
+            for i in self._current_client:
+                x = threading.Thread(target=self.run_client, args=(i,))
                 threads.append(x)
                 x.start()
 

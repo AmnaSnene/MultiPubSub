@@ -40,39 +40,38 @@ class Pub(PubSub):
     def msg_size(self, msg_size: int) -> None:
         self._msg_size = msg_size
 
-    def publish_per_second(self, client: mqtt_client, client_id: str, topic: str):
+    def publish_per_second(self, client: mqtt_client, topic: str):
         for i in range(self.msg_per_second * 2):
             msg = tools.create_msg(self.msg_size)
             result = client.publish(topic, msg)
             # result: [0, 1]
             status = result[0]
-            """
+
             if status == 0:
                 # pass
-                print(f"{client_id} Send to topic `{topic}`")
+                print(f"{client._client_id.decode()} Send to topic `{topic}`")
             else:
-                print(f"{client_id} Failed to send message to topic {topic}")
-            """
-    def publish(self, client: mqtt_client, client_id: str, topic: str) -> None:
+                print(f"{client._client_id.decode()} Failed to send message to topic {topic}")
+
+    def publish(self, client: mqtt_client,  topic: str) -> None:
         """
         """
-        schedule.every(2).second.do(self.publish_per_second, client=client, client_id=client_id, topic=topic)
+        schedule.every(2).second.do(self.publish_per_second, client=client, topic=topic)
         t_end = tools.get_t_end_publishing(self.duration_to_disconnect, self.publishing_duration) + time.time()
         while time.time() <= t_end:
             schedule.run_pending()
             time.sleep(1)
         try:
             if t_end == self.duration_to_disconnect + 1:
-                self.disconnect_mqtt(client, client_id)
+                self.disconnect_mqtt(client)
         except:
             pass
 
-    def run_client(self, client_id: str):
-        client = self.connect_mqtt(client_id)
+    def run_client(self, client_mqtt: mqtt_client):
         try:
             threads = list()
             for topic in self.topics:
-                x = threading.Thread(target=self.publish, args=(client, client_id, topic))
+                x = threading.Thread(target=self.publish, args=(client_mqtt, topic))
                 threads.append(x)
                 x.start()
 
