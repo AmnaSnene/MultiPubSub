@@ -41,23 +41,26 @@ class Pub(PubSub):
         self._msg_size = msg_size
 
     def publish_per_second(self, client: mqtt_client, client_id: str, topic: str):
-        for i in range(self.msg_per_second):
-            msg = tools.get_msg(self.msg_size)
+        for i in range(self.msg_per_second * 2):
+            msg = tools.create_msg(self.msg_size)
             result = client.publish(topic, msg)
             # result: [0, 1]
             status = result[0]
+            """
             if status == 0:
-                print(f"{client_id} Send `{msg}` to topic `{topic}`")
+                # pass
+                print(f"{client_id} Send to topic `{topic}`")
             else:
                 print(f"{client_id} Failed to send message to topic {topic}")
-
+            """
     def publish(self, client: mqtt_client, client_id: str, topic: str) -> None:
         """
         """
-        schedule.every().second.do(self.publish_per_second, client=client, client_id=client_id, topic=topic)
+        schedule.every(2).second.do(self.publish_per_second, client=client, client_id=client_id, topic=topic)
         t_end = tools.get_t_end_publishing(self.duration_to_disconnect, self.publishing_duration) + time.time()
         while time.time() <= t_end:
             schedule.run_pending()
+            time.sleep(1)
         try:
             if t_end == self.duration_to_disconnect + 1:
                 self.disconnect_mqtt(client, client_id)

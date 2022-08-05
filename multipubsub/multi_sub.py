@@ -1,7 +1,6 @@
 from time import sleep
-
+import multipubsub.tools as tools
 from multipubsub.multi_pub_sub import PubSub
-
 from paho.mqtt import client as mqtt_client
 
 
@@ -33,8 +32,15 @@ class Sub(PubSub):
             """
             The callback function.
             """
-            print(f"Client{client_id} Received `{msg.payload.decode()}` from `{msg.topic}` topic")
 
+            tools.calculate_latency(tools.unpack_msg(msg.payload), client)
+            #print(f"{client_id} Received from `{msg.topic}` topic")
+            # print("recieved")
+
+        def on_subscribe(client, userdata, mid, granted_qos):
+            print(f"Subscribed{client_id}")
+
+        client.on_subscribe = on_subscribe
         subscription_list = [(topic, self.qos) for topic in self.topics]
         client.subscribe(subscription_list)
         client.on_message = on_message
@@ -61,11 +67,15 @@ class Sub(PubSub):
         """
         client = self.connect_mqtt(client_id)
         self.subscribe(client, client_id)
+
         client.loop_start()
-        if self.duration_to_unsubscribe:
-            sleep(self.duration_to_unsubscribe)
-            self.unsubscribe(client, client_id)
-        if self.duration_to_disconnect:
-            sleep(self.duration_to_disconnect)
-            self.disconnect_mqtt(client, client_id)
-            client.loop_stop()
+        while 1:
+            if self.duration_to_unsubscribe:
+                sleep(self.duration_to_unsubscribe)
+                self.unsubscribe(client, client_id)
+            if self.duration_to_disconnect:
+                sleep(self.duration_to_disconnect)
+                self.disconnect_mqtt(client, client_id)
+                client.loop_stop()
+                break
+            sleep(1)

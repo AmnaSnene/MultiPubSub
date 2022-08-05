@@ -1,8 +1,7 @@
-import os
-import sys
+import struct
 import time
-from datetime import datetime
 import uuid
+from datetime import datetime
 
 
 def get_client_id():
@@ -23,12 +22,16 @@ def get_t_end_publishing(duration_to_disconnect, publishing_duration):
     return duration
 
 
-def get_msg(size):
-    return str(time.time_ns()) + ',' + str(uuid.getnode())
+def calculate_latency(data, client):
+    latency = time.time_ns() - data[0]
+    if data[1] == uuid.getnode():
+        client.publish("latency", struct.pack('ll', latency, uuid.getnode()))
 
 
-# Using os.urandom() method
-a = os.urandom(2)
+def create_msg(size):
+    pad_byte = size - 16
+    return struct.pack('ll{}'.format('x' * pad_byte), time.time_ns(), uuid.getnode())
 
-#print(asizeof.asizeof(a))
-#print(sys.getsizeof(a))
+
+def unpack_msg(msg):
+    return struct.unpack_from('ll', msg)

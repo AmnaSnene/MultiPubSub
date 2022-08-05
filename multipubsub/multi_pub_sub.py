@@ -50,6 +50,22 @@ class PubSub(ABC):
     def qos(self, qos: int) -> None:
         self._qos = qos
 
+    @property
+    def client_nb(self):
+        return self._client_nb
+
+    @client_nb.setter
+    def client_nb(self, client_nb: int):
+        self._client_nb = client_nb
+
+    @property
+    def topics_nb(self):
+        return self._topics_nb
+
+    @topics_nb.setter
+    def topics_nb(self, topics_nb: int):
+        self._topics_nb = topics_nb
+
     """
     If you want to disconnect after n seconds, you should change the default value of the attribute
     duration_to_disconnect. Defaults to 0.
@@ -77,7 +93,7 @@ class PubSub(ABC):
         :return:
         """
         client = mqtt_client.Client(client_id)
-        #client.on_connect = on_connect
+        # client.on_connect = on_connect
         client.connect(self._host, self._port)
         return client
 
@@ -85,7 +101,7 @@ class PubSub(ABC):
         """
             This method disconnects the client from a broker.
         """
-        #mqtt_client.on_disconnect = on_disconnect
+        # mqtt_client.on_disconnect = on_disconnect
         client.disconnect()
 
     @abc.abstractmethod

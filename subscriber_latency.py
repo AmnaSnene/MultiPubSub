@@ -47,6 +47,6 @@ class SubLatency(Sub):
 
 
 # create Sub object with 4 client to run later.
-subscribers = SubLatency(client_nb=1, port=1883, host='pi3-r1-m1-l1-p1.pi3lan.local', topics_nb=1)
+subscribers = SubLatency(host="pi3-r1-m1-l1-p1.pi3lan.local")
 subscribers.topics = ['latency']
 subscribers.run_multiple()
