@@ -7,7 +7,7 @@ from multipubsub.multi_sub import Sub
 from paho.mqtt import client as mqtt_client
 
 now = datetime.now()
-current_time = now.strftime("%H:%M:%S")
+current_time = now.strftime("%m%d%Y-%H:%M:%S")
 
 # Open new file and write the header
 file_name = f'latency-{current_time}.csv'
@@ -19,7 +19,7 @@ f.close()
 
 
 class SubLatency(Sub):
-    def subscribe(self, client: mqtt_client, client_id: str):
+    def subscribe(self, client: mqtt_client):
         """
         This method subscribes the client to one or multiple topics.
         """
@@ -38,7 +38,7 @@ class SubLatency(Sub):
             # print("recieved")
 
         def on_subscribe(client, userdata, mid, granted_qos):
-            print(f"Subscribed{client_id}")
+            print(f"Subscribed{client._client_id.decode()}")
 
         client.on_subscribe = on_subscribe
         subscription_list = [(topic, self.qos) for topic in self.topics]
@@ -47,6 +47,8 @@ class SubLatency(Sub):
 
 
 # create Sub object with 4 client to run later.
-subscribers = SubLatency(host="pi3-r1-m1-l1-p1.pi3lan.local")
+#subscribers = SubLatency(host="pi3-r1-m1-l1-p1.pi3lan.local")
+subscribers = SubLatency(host="localhost")
+
 subscribers.topics = ['latency']
 subscribers.run_multiple()

@@ -94,10 +94,8 @@ class PubSub(ABC):
         :return:
         """
         client = mqtt_client.Client(client_id)
-        print('client')
         # client.on_connect = on_connect
         client.connect(self._host, self._port)
-        print('connected')
         return client
 
     @staticmethod
@@ -118,14 +116,10 @@ class PubSub(ABC):
 
     def update_client_list(self):
         difference_client = len(self._current_client) - self._client_nb
-        print(abs(difference_client))
         if difference_client < 0:
             for i in range(abs(difference_client)):
-                print("append")
                 id = tools.get_client_id()
-                print(id)
                 client = self.connect_mqtt(id)
-                print('connect')
                 self._current_client.append(client)
         else:
             for i in range(difference_client):
@@ -138,11 +132,9 @@ class PubSub(ABC):
         :return:
         """
         self._set_topics()
-        print(self._topics)
         try:
             threads = list()
             self.update_client_list()
-            print(self._current_client)
             for i in self._current_client:
                 x = threading.Thread(target=self.run_client, args=(i,))
                 threads.append(x)

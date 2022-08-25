@@ -34,8 +34,8 @@ class Sub(PubSub):
             """
 
             tools.calculate_latency(tools.unpack_msg(msg.payload), client)
-            #print(f"{client_id} Received from `{msg.topic}` topic")
-            #print("received")
+            print(f"{client._client_id.decode()} Received from `{msg.topic}` topic")
+            print("received")
 
         def on_subscribe(client, userdata, mid, granted_qos):
             print(f"Subscribed{client._client_id.decode()}")

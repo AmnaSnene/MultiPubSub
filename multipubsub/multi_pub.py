@@ -49,14 +49,14 @@ class Pub(PubSub):
 
             if status == 0:
                 # pass
-                print(f"{client._client_id.decode()} Send to topic `{topic}`")
+                print(f"{client._client_id.decode()} Send to topic {topic} {time.time()}")
             else:
                 print(f"{client._client_id.decode()} Failed to send message to topic {topic}")
 
     def publish(self, client: mqtt_client,  topic: str) -> None:
         """
         """
-        schedule.every(2).second.do(self.publish_per_second, client=client, topic=topic)
+        schedule.every(2).seconds.do(self.publish_per_second, client=client, topic=topic)
         t_end = tools.get_t_end_publishing(self.duration_to_disconnect, self.publishing_duration) + time.time()
         while time.time() <= t_end:
             schedule.run_pending()
