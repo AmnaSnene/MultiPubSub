@@ -6,7 +6,7 @@ from multipubsub.multi_pub import Pub
 # The number of clients, topics, msg per second and msg size change every 15s
 
 
-publisher = Pub(port=1884, host="localhost")
+publisher = Pub(port=1883, host="localhost")
 
 nb_client = [1, 1, 1, 1, 10, 10, 10, 10, 1, 1, 1, 1, 10, 10, 10, 10]
 nb_topic = [1, 5, 1, 5, 1, 1, 5, 5, 1, 5, 1, 5, 5, 5, 1, 1]
