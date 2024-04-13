@@ -8,8 +8,8 @@ from multipubsub.multi_pub import Pub
 
 publisher = Pub(port=1883, host="localhost")
 
-nb_client = [1, 1, 1, 1, 10, 10, 10, 10, 1, 1, 1, 1, 10, 10, 10, 10]
-nb_topic = [1, 5, 1, 5, 1, 1, 5, 5, 1, 5, 1, 5, 5, 5, 1, 1]
+nb_client = [1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 5, 5, 5, 5]
+nb_topic = [1, 3, 1, 3, 1, 1, 3, 3, 1, 3, 1, 3, 3, 3, 1, 1]
 while True:
     for i in range(len(nb_client)):
         publisher.topics_nb = nb_topic[i]
