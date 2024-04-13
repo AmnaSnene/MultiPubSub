@@ -4,7 +4,7 @@ from multipubsub.multi_sub import Sub
 # In this example I adopted a dynamic scenario: the system state changes every 15s.
 
 # Create Sub object with the broker address
-subscribers = Sub(host="localhost", port=1884)
+subscribers = Sub(host="localhost", port=1883)
 
 
 nb_client = [1, 1, 10, 10, 10, 10, 10, 10, 1, 1, 10, 10, 1, 1, 1, 1]
