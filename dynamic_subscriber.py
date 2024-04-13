@@ -7,8 +7,8 @@ from multipubsub.multi_sub import Sub
 subscribers = Sub(host="localhost", port=1883)
 
 
-nb_client = [1, 1, 10, 10, 10, 10, 10, 10, 1, 1, 10, 10, 1, 1, 1, 1]
-nb_topic = [1, 1, 1, 5, 5, 1, 1, 5, 5, 5, 5, 1, 1, 5, 1, 5]
+nb_client = [1, 1, 5, 5, 5, 5, 5, 5, 1, 1, 5, 5, 1, 1, 1, 1]
+nb_topic = [1, 1, 1, 3, 3, 1, 1, 3, 3, 3, 3, 1, 1,3, 1, 3]
 
 while True:
     for i in range(len(nb_client)):
